@@ -4,6 +4,8 @@ import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { LoginPage } from '@/routes/LoginPage'
 import { SignupPage } from '@/routes/SignupPage'
 import { PersonalPage } from '@/routes/PersonalPage'
+import { PersonalIncomePage } from '@/routes/PersonalIncomePage'
+import { PersonalExpensesPage } from '@/routes/PersonalExpensesPage'
 import { GroupsPage } from '@/routes/GroupsPage'
 import { GroupDetailPage } from '@/routes/GroupDetailPage'
 import { ProfilePage } from '@/routes/ProfilePage'
@@ -21,6 +23,22 @@ export function App() {
             element={
               <ProtectedRoute>
                 <PersonalPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/personal/ingresos"
+            element={
+              <ProtectedRoute>
+                <PersonalIncomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/personal/gastos"
+            element={
+              <ProtectedRoute>
+                <PersonalExpensesPage />
               </ProtectedRoute>
             }
           />
