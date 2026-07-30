@@ -9,8 +9,17 @@ import type {
   VariableExpense,
 } from './types'
 
+// Acotado a owner_type='user': desde que existen emprendimientos de grupo
+// (Fase 5.1) RLS tambien deja ver income_sources de owner_type='group' de
+// los grupos del usuario, asi que sin este filtro la vista Personal
+// mezclaria emprendimientos de grupo con las fuentes propias — rompe la
+// vista dual (personal 100% privado vs. grupo) del plan del proyecto.
 export async function fetchIncomeSources(): Promise<IncomeSource[]> {
-  const { data, error } = await supabase.from('income_sources').select('*').order('created_at', { ascending: true })
+  const { data, error } = await supabase
+    .from('income_sources')
+    .select('*')
+    .eq('owner_type', 'user')
+    .order('created_at', { ascending: true })
   if (error) throw error
   return data
 }
@@ -28,10 +37,19 @@ export async function createIncomeSource(
   return data
 }
 
+// Acotado a fuentes propias (owner_type='user'): igual motivo que
+// fetchIncomeSources — desde Fase 5.1, RLS tambien deja ver income_entries
+// de emprendimientos de GRUPO de los que el usuario es miembro, y esta
+// funcion alimenta el dashboard/pantalla personal (nunca debe mezclarse con
+// ventas de un emprendimiento de grupo).
 export async function fetchIncomeEntries(monthStart: string, monthEndExclusive: string): Promise<IncomeEntry[]> {
+  const sourceIds = (await fetchIncomeSources()).map((source) => source.id)
+  if (sourceIds.length === 0) return []
+
   const { data, error } = await supabase
     .from('income_entries')
     .select('*')
+    .in('income_source_id', sourceIds)
     .gte('date', monthStart)
     .lt('date', monthEndExclusive)
     .order('date', { ascending: false })

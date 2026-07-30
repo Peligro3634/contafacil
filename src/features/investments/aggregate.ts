@@ -1,6 +1,6 @@
 import type { IncomeEntry, IncomeSource } from '@/features/personal/types'
 import { monthRange } from '@/lib/month'
-import type { BusinessExpense, Investment } from './types'
+import type { BusinessExpense, IncomeSourcePartner, Investment } from './types'
 
 export interface BreakdownItem {
   label: string
@@ -102,6 +102,28 @@ export function computeConsolidatedStatus(statuses: EmprendimientoStatus[]): Con
     }),
     { capitalInvertido: 0, recuperado: 0, pendiente: 0, gananciaPostRecupero: 0 },
   )
+}
+
+export interface PartnerShare {
+  userId: string
+  participacionPct: number
+  aporteInicial: number
+  recuperado: number
+  gananciaPostRecupero: number
+}
+
+// Reparte recuperado/gananciaPostRecupero de un emprendimiento de grupo
+// entre sus socios segun participacion_pct — ese % es fijo (pactado al
+// crear el emprendimiento, ver create_group_income_source) y es lo que
+// manda para el reparto; aporte_inicial es solo informativo.
+export function computePartnerShares(status: EmprendimientoStatus, partners: IncomeSourcePartner[]): PartnerShare[] {
+  return partners.map((partner) => ({
+    userId: partner.user_id,
+    participacionPct: partner.participacion_pct,
+    aporteInicial: partner.aporte_inicial,
+    recuperado: (status.recuperado * partner.participacion_pct) / 100,
+    gananciaPostRecupero: (status.gananciaPostRecupero * partner.participacion_pct) / 100,
+  }))
 }
 
 // Costos de negocio de "month" agrupados por emprendimiento: lo que se suma

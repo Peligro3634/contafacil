@@ -14,6 +14,7 @@ import { GroupDetailPage } from '@/routes/GroupDetailPage'
 import { GroupGoalsPage } from '@/routes/GroupGoalsPage'
 import { GroupFundPage } from '@/routes/GroupFundPage'
 import { GroupExpensesPage } from '@/routes/GroupExpensesPage'
+import { GroupInvestmentsPage } from '@/routes/GroupInvestmentsPage'
 import { ProfilePage } from '@/routes/ProfilePage'
 
 export function App() {
@@ -109,6 +110,14 @@ export function App() {
             element={
               <ProtectedRoute>
                 <GroupExpensesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/groups/:groupId/emprendimientos"
+            element={
+              <ProtectedRoute>
+                <GroupInvestmentsPage />
               </ProtectedRoute>
             }
           />

@@ -32,6 +32,10 @@ export function EmprendimientoBlock({
   month,
   investments,
   monthExpenses,
+  // Oculta las altas/bajas de aportes y gastos (RLS ya las bloquea para
+  // quien no sea socio de un emprendimiento de grupo, pero ocultarlas evita
+  // mostrar un formulario que va a fallar al enviarse).
+  readOnly = false,
   onCreateInvestment,
   onDeleteInvestment,
   onCreateBusinessExpense,
@@ -42,10 +46,11 @@ export function EmprendimientoBlock({
   month: string
   investments: Investment[]
   monthExpenses: BusinessExpense[]
-  onCreateInvestment: (input: InvestmentInput) => Promise<void>
-  onDeleteInvestment: (id: string) => Promise<void>
-  onCreateBusinessExpense: (input: BusinessExpenseInput) => Promise<void>
-  onDeleteBusinessExpense: (id: string) => Promise<void>
+  readOnly?: boolean
+  onCreateInvestment?: (input: InvestmentInput) => Promise<void>
+  onDeleteInvestment?: (id: string) => Promise<void>
+  onCreateBusinessExpense?: (input: BusinessExpenseInput) => Promise<void>
+  onDeleteBusinessExpense?: (id: string) => Promise<void>
 }) {
   const [addingInvestment, setAddingInvestment] = useState(false)
   const [addingExpense, setAddingExpense] = useState(false)
@@ -116,31 +121,38 @@ export function EmprendimientoBlock({
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="font-medium">{formatCurrency(investment.amount)}</span>
-                  <button onClick={() => onDeleteInvestment(investment.id)} className="text-red-600 underline">
-                    Eliminar
-                  </button>
+                  {!readOnly && onDeleteInvestment && (
+                    <button onClick={() => onDeleteInvestment(investment.id)} className="text-red-600 underline">
+                      Eliminar
+                    </button>
+                  )}
                 </div>
               </li>
             ))}
           </ul>
         )}
 
-        {addingInvestment ? (
-          <div className="mt-2">
-            <CreateInvestmentForm
-              defaultDate={month}
-              onSubmit={async (input) => {
-                await onCreateInvestment(input)
-                setAddingInvestment(false)
-              }}
-              onCancel={() => setAddingInvestment(false)}
-            />
-          </div>
-        ) : (
-          <button onClick={() => setAddingInvestment(true)} className="mt-2 text-sm font-medium text-slate-900 underline">
-            + Nuevo aporte
-          </button>
-        )}
+        {!readOnly &&
+          onCreateInvestment &&
+          (addingInvestment ? (
+            <div className="mt-2">
+              <CreateInvestmentForm
+                defaultDate={month}
+                onSubmit={async (input) => {
+                  await onCreateInvestment(input)
+                  setAddingInvestment(false)
+                }}
+                onCancel={() => setAddingInvestment(false)}
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => setAddingInvestment(true)}
+              className="mt-2 text-sm font-medium text-slate-900 underline"
+            >
+              + Nuevo aporte
+            </button>
+          ))}
       </div>
 
       <div className="mt-3">
@@ -155,32 +167,39 @@ export function EmprendimientoBlock({
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="font-medium">{formatCurrency(expense.amount)}</span>
-                  <button onClick={() => onDeleteBusinessExpense(expense.id)} className="text-red-600 underline">
-                    Eliminar
-                  </button>
+                  {!readOnly && onDeleteBusinessExpense && (
+                    <button onClick={() => onDeleteBusinessExpense(expense.id)} className="text-red-600 underline">
+                      Eliminar
+                    </button>
+                  )}
                 </div>
               </li>
             ))}
           </ul>
         )}
 
-        {addingExpense ? (
-          <div className="mt-2">
-            <CreateBusinessExpenseForm
-              onSubmit={async (input) => {
-                await onCreateBusinessExpense(input)
-                setAddingExpense(false)
-              }}
-            />
-            <button onClick={() => setAddingExpense(false)} className="mt-2 text-sm text-slate-500 underline">
-              Cancelar
+        {!readOnly &&
+          onCreateBusinessExpense &&
+          (addingExpense ? (
+            <div className="mt-2">
+              <CreateBusinessExpenseForm
+                onSubmit={async (input) => {
+                  await onCreateBusinessExpense(input)
+                  setAddingExpense(false)
+                }}
+              />
+              <button onClick={() => setAddingExpense(false)} className="mt-2 text-sm text-slate-500 underline">
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setAddingExpense(true)}
+              className="mt-2 text-sm font-medium text-slate-900 underline"
+            >
+              + Nuevo gasto
             </button>
-          </div>
-        ) : (
-          <button onClick={() => setAddingExpense(true)} className="mt-2 text-sm font-medium text-slate-900 underline">
-            + Nuevo gasto
-          </button>
-        )}
+          ))}
       </div>
     </div>
   )

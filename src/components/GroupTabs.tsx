@@ -6,6 +6,7 @@ export function GroupTabs({ groupId }: { groupId: string }) {
     { to: `/groups/${groupId}/metas`, label: 'Metas', end: false },
     { to: `/groups/${groupId}/fondo`, label: 'Fondo común', end: false },
     { to: `/groups/${groupId}/gastos`, label: 'Gastos', end: false },
+    { to: `/groups/${groupId}/emprendimientos`, label: 'Emprendimientos', end: false },
   ]
 
   return (

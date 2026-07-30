@@ -408,6 +408,18 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      income_source_partners: {
+        Row: {
+          id: string
+          income_source_id: string
+          user_id: string
+          aporte_inicial: number
+          participacion_pct: number
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -443,6 +455,16 @@ export interface Database {
           p_shares: { user_id: string; amount: number }[] | null
         }
         Returns: Database['public']['Tables']['group_expenses']['Row']
+      }
+      create_group_income_source: {
+        Args: {
+          p_group_id: string
+          p_type: IncomeSourceType
+          p_name: string
+          p_product_mode: ProductMode
+          p_partners: { user_id: string; participacion_pct: number; aporte_inicial: number }[]
+        }
+        Returns: Database['public']['Tables']['income_sources']['Row']
       }
     }
     Enums: Record<string, never>
