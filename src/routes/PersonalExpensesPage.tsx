@@ -17,6 +17,7 @@ import { CreateVariableExpenseForm } from '@/features/personal/CreateVariableExp
 import { FixedExpenseRow } from '@/features/personal/FixedExpenseRow'
 import type { FixedExpense, FixedExpenseEntry, VariableExpense } from '@/features/personal/types'
 import { VariableExpenseList } from '@/features/personal/VariableExpenseList'
+import { ReceiptCaptureFlow } from '@/features/receipts/ReceiptCaptureFlow'
 import { currentMonthKey } from '@/lib/month'
 
 export function PersonalExpensesPage() {
@@ -28,6 +29,7 @@ export function PersonalExpensesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showCreateFixed, setShowCreateFixed] = useState(false)
+  const [capturingExpense, setCapturingExpense] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -116,6 +118,25 @@ export function PersonalExpensesPage() {
                 setVariableExpenses((prev) => [created, ...prev])
               }}
             />
+
+            {capturingExpense ? (
+              <ReceiptCaptureFlow
+                userId={user.id}
+                relatedEntity="expense"
+                onExpenseCreated={(expense) => {
+                  setVariableExpenses((prev) => [expense, ...prev])
+                  setCapturingExpense(false)
+                }}
+                onCancel={() => setCapturingExpense(false)}
+              />
+            ) : (
+              <button
+                onClick={() => setCapturingExpense(true)}
+                className="text-sm font-medium text-slate-900 underline"
+              >
+                + Cargar gasto por foto/PDF
+              </button>
+            )}
 
             <VariableExpenseList
               expenses={variableExpenses}

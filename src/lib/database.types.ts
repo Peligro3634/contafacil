@@ -10,6 +10,9 @@ export type IncomeSourceType = 'empleado_fijo' | 'monotributo' | 'responsable_in
 export type ProductMode = 'simple' | 'detallado'
 export type BusinessExpenseType = 'costo_mercaderia' | 'gasto_operativo'
 export type GroupExpenseSource = 'fondo_comun' | 'personal'
+export type ReceiptRelatedEntity = 'income_entry' | 'expense'
+export type ReceiptStatus = 'pendiente_confirmacion' | 'confirmado' | 'editado_manualmente'
+export type ReceiptConfidence = 'alta' | 'media' | 'baja'
 
 export interface Database {
   public: {
@@ -418,6 +421,60 @@ export interface Database {
         }
         Insert: never
         Update: never
+        Relationships: []
+      }
+      receipts: {
+        Row: {
+          id: string
+          user_id: string
+          related_entity: ReceiptRelatedEntity
+          target_income_source_id: string | null
+          file_path: string
+          status: ReceiptStatus
+          extracted_amount: number | null
+          extracted_date: string | null
+          extracted_note: string | null
+          confidence: ReceiptConfidence | null
+          requires_review: boolean | null
+          review_reason: string | null
+          extraction_input_tokens: number | null
+          extraction_output_tokens: number | null
+          created_income_entry_id: string | null
+          created_expense_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          related_entity: ReceiptRelatedEntity
+          target_income_source_id?: string | null
+          file_path: string
+          status?: ReceiptStatus
+          extracted_amount?: number | null
+          extracted_date?: string | null
+          extracted_note?: string | null
+          confidence?: ReceiptConfidence | null
+          requires_review?: boolean | null
+          review_reason?: string | null
+          extraction_input_tokens?: number | null
+          extraction_output_tokens?: number | null
+          created_income_entry_id?: string | null
+          created_expense_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          status?: ReceiptStatus
+          extracted_amount?: number | null
+          extracted_date?: string | null
+          extracted_note?: string | null
+          confidence?: ReceiptConfidence | null
+          requires_review?: boolean | null
+          review_reason?: string | null
+          extraction_input_tokens?: number | null
+          extraction_output_tokens?: number | null
+          created_income_entry_id?: string | null
+          created_expense_id?: string | null
+        }
         Relationships: []
       }
     }

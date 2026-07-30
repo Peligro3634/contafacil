@@ -5,7 +5,9 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  // supabase/functions corre en Deno (globals e imports npm:/jsr: propios),
+  // no en el proyecto Vite/Node de este eslint config.
+  { ignores: ['dist', 'supabase/functions/**'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

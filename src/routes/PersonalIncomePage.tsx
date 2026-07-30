@@ -65,6 +65,7 @@ export function PersonalIncomePage() {
                 source={source}
                 entries={entries.filter((entry) => entry.income_source_id === source.id)}
                 monthDefaultDate={month}
+                userId={user.id}
                 onCreateEntry={async (values) => {
                   const created = await createIncomeEntry(source.id, values)
                   setEntries((prev) => [created, ...prev])
@@ -77,6 +78,7 @@ export function PersonalIncomePage() {
                   await deleteIncomeEntry(id)
                   setEntries((prev) => prev.filter((entry) => entry.id !== id))
                 }}
+                onEntryCaptured={(entry) => setEntries((prev) => [entry, ...prev])}
               />
             ))}
 

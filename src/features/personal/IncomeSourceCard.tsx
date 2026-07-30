@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ReceiptCaptureFlow } from '@/features/receipts/ReceiptCaptureFlow'
 import { formatCurrency } from '@/lib/format'
 import { IncomeEntryForm } from './IncomeEntryForm'
 import type { IncomeEntry, IncomeEntryInput, IncomeSource } from './types'
@@ -13,18 +14,23 @@ export function IncomeSourceCard({
   source,
   entries,
   monthDefaultDate,
+  userId,
   onCreateEntry,
   onUpdateEntry,
   onDeleteEntry,
+  onEntryCaptured,
 }: {
   source: IncomeSource
   entries: IncomeEntry[]
   monthDefaultDate: string
+  userId: string
   onCreateEntry: (values: IncomeEntryInput) => Promise<void>
   onUpdateEntry: (id: string, values: IncomeEntryInput) => Promise<void>
   onDeleteEntry: (id: string) => Promise<void>
+  onEntryCaptured: (entry: IncomeEntry) => void
 }) {
   const [adding, setAdding] = useState(false)
+  const [capturing, setCapturing] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const total = entries.reduce((sum, entry) => sum + entry.base_amount + entry.extra_amount, 0)
 
@@ -80,7 +86,7 @@ export function IncomeSourceCard({
         </ul>
       )}
 
-      {adding ? (
+      {adding && (
         <div className="mt-3">
           <IncomeEntryForm
             defaultDate={monthDefaultDate}
@@ -91,10 +97,32 @@ export function IncomeSourceCard({
             onCancel={() => setAdding(false)}
           />
         </div>
-      ) : (
-        <button onClick={() => setAdding(true)} className="mt-3 text-sm font-medium text-slate-900 underline">
-          + Cargar ingreso
-        </button>
+      )}
+
+      {capturing && (
+        <div className="mt-3">
+          <ReceiptCaptureFlow
+            userId={userId}
+            relatedEntity="income_entry"
+            targetIncomeSourceId={source.id}
+            onIncomeEntryCreated={(entry) => {
+              onEntryCaptured(entry)
+              setCapturing(false)
+            }}
+            onCancel={() => setCapturing(false)}
+          />
+        </div>
+      )}
+
+      {!adding && !capturing && (
+        <div className="mt-3 flex gap-3">
+          <button onClick={() => setAdding(true)} className="text-sm font-medium text-slate-900 underline">
+            + Cargar ingreso
+          </button>
+          <button onClick={() => setCapturing(true)} className="text-sm font-medium text-slate-900 underline">
+            + Foto/PDF
+          </button>
+        </div>
       )}
     </div>
   )
