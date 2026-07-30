@@ -1,4 +1,6 @@
 import { useState, type FormEvent } from 'react'
+import { createCardPurchase } from '@/features/cards/api'
+import type { CardPurchase } from '@/features/cards/types'
 import { createIncomeEntry, createVariableExpense } from '@/features/personal/api'
 import type { IncomeEntry, VariableExpense } from '@/features/personal/types'
 import { monthKeyFromDate, todayDateKey } from '@/lib/month'
@@ -7,26 +9,31 @@ import type { Receipt } from './types'
 
 type Step = 'idle' | 'uploading' | 'extracting' | 'confirming' | 'submitting'
 
-// Comprobante (foto/PDF) para una venta/ingreso o un gasto variable: sube el
-// archivo, dispara la extraccion por IA (Edge Function extract-receipt) y
-// muestra una pantalla de confirmacion editable antes de crear el registro
-// final — nunca se guarda el income_entry/variable_expense directo desde lo
-// que devuelve la IA.
+// Comprobante (foto/PDF) para una venta/ingreso, un gasto variable o una
+// compra de tarjeta: sube el archivo, dispara la extraccion por IA (Edge
+// Function extract-receipt) y muestra una pantalla de confirmacion editable
+// antes de crear el registro final — nunca se guarda directo lo que
+// devuelve la IA. La cantidad de cuotas de una compra de tarjeta nunca se
+// auto-extrae (es una decision del usuario), se completa siempre a mano.
 export function ReceiptCaptureFlow({
   userId,
   relatedEntity,
   targetIncomeSourceId,
+  targetCreditCardId,
   defaultCategory,
   onIncomeEntryCreated,
   onExpenseCreated,
+  onCardPurchaseCreated,
   onCancel,
 }: {
   userId: string
-  relatedEntity: 'income_entry' | 'expense'
+  relatedEntity: 'income_entry' | 'expense' | 'card_purchase'
   targetIncomeSourceId?: string
+  targetCreditCardId?: string
   defaultCategory?: string
   onIncomeEntryCreated?: (entry: IncomeEntry) => void
   onExpenseCreated?: (expense: VariableExpense) => void
+  onCardPurchaseCreated?: (purchase: CardPurchase) => void
   onCancel?: () => void
 }) {
   const [step, setStep] = useState<Step>('idle')
@@ -37,6 +44,7 @@ export function ReceiptCaptureFlow({
   const [date, setDate] = useState('')
   const [note, setNote] = useState('')
   const [category, setCategory] = useState(defaultCategory ?? '')
+  const [installmentsCount, setInstallmentsCount] = useState('1')
 
   async function handleFileSelected(file: File) {
     setError(null)
@@ -46,6 +54,7 @@ export function ReceiptCaptureFlow({
       const created = await createReceipt(userId, {
         related_entity: relatedEntity,
         target_income_source_id: relatedEntity === 'income_entry' ? (targetIncomeSourceId ?? null) : null,
+        target_credit_card_id: relatedEntity === 'card_purchase' ? (targetCreditCardId ?? null) : null,
         file_path: path,
       })
       setReceipt(created)
@@ -94,7 +103,7 @@ export function ReceiptCaptureFlow({
         })
         await markReceiptConfirmed(receipt.id, status, { incomeEntryId: createdEntry.id })
         onIncomeEntryCreated?.(createdEntry)
-      } else {
+      } else if (relatedEntity === 'expense') {
         const createdExpense = await createVariableExpense(userId, {
           category: category.trim() === '' ? 'Comprobante' : category.trim(),
           month: monthKeyFromDate(date),
@@ -102,12 +111,23 @@ export function ReceiptCaptureFlow({
         })
         await markReceiptConfirmed(receipt.id, status, { expenseId: createdExpense.id })
         onExpenseCreated?.(createdExpense)
+      } else {
+        if (!targetCreditCardId) throw new Error('Falta la tarjeta')
+        const createdPurchase = await createCardPurchase(targetCreditCardId, {
+          date,
+          amount_total: Number(amount) || 0,
+          description: note.trim() === '' ? 'Comprobante' : note.trim(),
+          installments_count: Number(installmentsCount) || 1,
+        })
+        await markReceiptConfirmed(receipt.id, status, { cardPurchaseId: createdPurchase.id })
+        onCardPurchaseCreated?.(createdPurchase)
       }
 
       setReceipt(null)
       setAmount('')
       setDate('')
       setNote('')
+      setInstallmentsCount('1')
       setStep('idle')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo confirmar el comprobante')
@@ -201,11 +221,26 @@ export function ReceiptCaptureFlow({
       )}
       <input
         type="text"
-        placeholder="Nota (opcional)"
+        placeholder={relatedEntity === 'card_purchase' ? 'Descripción (ej: Zapatillas)' : 'Nota (opcional)'}
+        required={relatedEntity === 'card_purchase'}
         value={note}
         onChange={(e) => setNote(e.target.value)}
         className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
       />
+      {relatedEntity === 'card_purchase' && (
+        <label className="text-xs text-slate-500">
+          Cuotas (no se detecta automaticamente, elegí a mano)
+          <input
+            type="number"
+            required
+            min="1"
+            step="1"
+            value={installmentsCount}
+            onChange={(e) => setInstallmentsCount(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900"
+          />
+        </label>
+      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

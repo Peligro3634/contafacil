@@ -10,7 +10,7 @@ export type IncomeSourceType = 'empleado_fijo' | 'monotributo' | 'responsable_in
 export type ProductMode = 'simple' | 'detallado'
 export type BusinessExpenseType = 'costo_mercaderia' | 'gasto_operativo'
 export type GroupExpenseSource = 'fondo_comun' | 'personal'
-export type ReceiptRelatedEntity = 'income_entry' | 'expense'
+export type ReceiptRelatedEntity = 'income_entry' | 'expense' | 'card_purchase'
 export type ReceiptStatus = 'pendiente_confirmacion' | 'confirmado' | 'editado_manualmente'
 export type ReceiptConfidence = 'alta' | 'media' | 'baja'
 
@@ -429,6 +429,7 @@ export interface Database {
           user_id: string
           related_entity: ReceiptRelatedEntity
           target_income_source_id: string | null
+          target_credit_card_id: string | null
           file_path: string
           status: ReceiptStatus
           extracted_amount: number | null
@@ -441,6 +442,7 @@ export interface Database {
           extraction_output_tokens: number | null
           created_income_entry_id: string | null
           created_expense_id: string | null
+          created_card_purchase_id: string | null
           created_at: string
         }
         Insert: {
@@ -448,6 +450,7 @@ export interface Database {
           user_id: string
           related_entity: ReceiptRelatedEntity
           target_income_source_id?: string | null
+          target_credit_card_id?: string | null
           file_path: string
           status?: ReceiptStatus
           extracted_amount?: number | null
@@ -460,6 +463,7 @@ export interface Database {
           extraction_output_tokens?: number | null
           created_income_entry_id?: string | null
           created_expense_id?: string | null
+          created_card_purchase_id?: string | null
           created_at?: string
         }
         Update: {
@@ -474,6 +478,7 @@ export interface Database {
           extraction_output_tokens?: number | null
           created_income_entry_id?: string | null
           created_expense_id?: string | null
+          created_card_purchase_id?: string | null
         }
         Relationships: []
       }

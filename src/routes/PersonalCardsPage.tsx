@@ -93,6 +93,7 @@ export function PersonalCardsPage() {
                 statement={statement}
                 dueMonth={dueMonth}
                 monthDefaultDate={period}
+                userId={user.id}
                 onUpdateCard={async (input) => {
                   const updated = await updateCreditCard(statement.card.id, input)
                   setCards((prev) => prev.map((c) => (c.id === updated.id ? updated : c)))
@@ -103,6 +104,9 @@ export function PersonalCardsPage() {
                 }}
                 onDeletePurchase={async (purchaseId) => {
                   await deleteCardPurchase(purchaseId)
+                  await refreshPeriod()
+                }}
+                onPurchaseCaptured={async () => {
                   await refreshPeriod()
                 }}
               />

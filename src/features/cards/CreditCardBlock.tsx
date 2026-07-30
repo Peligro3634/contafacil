@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { ReceiptCaptureFlow } from '@/features/receipts/ReceiptCaptureFlow'
 import { formatCurrency } from '@/lib/format'
 import { monthLabel } from '@/lib/month'
 import { CardPurchaseForm } from './CardPurchaseForm'
 import type { CardStatement } from './aggregate'
-import type { CardPurchaseInput, CreditCard, CreditCardInput } from './types'
+import type { CardPurchase, CardPurchaseInput, CreditCard, CreditCardInput } from './types'
 
 function EditCreditCardForm({
   card,
@@ -86,19 +87,24 @@ export function CreditCardBlock({
   statement,
   dueMonth,
   monthDefaultDate,
+  userId,
   onUpdateCard,
   onCreatePurchase,
   onDeletePurchase,
+  onPurchaseCaptured,
 }: {
   statement: CardStatement
   dueMonth: string
   monthDefaultDate: string
+  userId: string
   onUpdateCard: (input: CreditCardInput) => Promise<void>
   onCreatePurchase: (input: CardPurchaseInput) => Promise<void>
   onDeletePurchase: (purchaseId: string) => Promise<void>
+  onPurchaseCaptured: (purchase: CardPurchase) => void
 }) {
   const [editing, setEditing] = useState(false)
   const [addingPurchase, setAddingPurchase] = useState(false)
+  const [capturingPurchase, setCapturingPurchase] = useState(false)
   const { card, total, lines } = statement
 
   return (
@@ -146,7 +152,7 @@ export function CreditCardBlock({
         </ul>
       )}
 
-      {addingPurchase ? (
+      {addingPurchase && (
         <div className="mt-3">
           <CardPurchaseForm
             defaultDate={monthDefaultDate}
@@ -157,13 +163,32 @@ export function CreditCardBlock({
             onCancel={() => setAddingPurchase(false)}
           />
         </div>
-      ) : (
-        <button
-          onClick={() => setAddingPurchase(true)}
-          className="mt-3 text-sm font-medium text-slate-900 underline"
-        >
-          + Cargar compra
-        </button>
+      )}
+
+      {capturingPurchase && (
+        <div className="mt-3">
+          <ReceiptCaptureFlow
+            userId={userId}
+            relatedEntity="card_purchase"
+            targetCreditCardId={card.id}
+            onCardPurchaseCreated={(purchase) => {
+              onPurchaseCaptured(purchase)
+              setCapturingPurchase(false)
+            }}
+            onCancel={() => setCapturingPurchase(false)}
+          />
+        </div>
+      )}
+
+      {!addingPurchase && !capturingPurchase && (
+        <div className="mt-3 flex gap-3">
+          <button onClick={() => setAddingPurchase(true)} className="text-sm font-medium text-slate-900 underline">
+            + Cargar compra
+          </button>
+          <button onClick={() => setCapturingPurchase(true)} className="text-sm font-medium text-slate-900 underline">
+            + Foto/PDF
+          </button>
+        </div>
       )}
     </div>
   )

@@ -36,7 +36,7 @@ export async function extractReceipt(receiptId: string): Promise<ExtractionResul
 export async function markReceiptConfirmed(
   id: string,
   status: 'confirmado' | 'editado_manualmente',
-  linkedId: { incomeEntryId?: string; expenseId?: string },
+  linkedId: { incomeEntryId?: string; expenseId?: string; cardPurchaseId?: string },
 ): Promise<void> {
   const { error } = await supabase
     .from('receipts')
@@ -44,6 +44,7 @@ export async function markReceiptConfirmed(
       status,
       created_income_entry_id: linkedId.incomeEntryId ?? null,
       created_expense_id: linkedId.expenseId ?? null,
+      created_card_purchase_id: linkedId.cardPurchaseId ?? null,
     })
     .eq('id', id)
   if (error) throw error

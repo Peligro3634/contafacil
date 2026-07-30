@@ -17,5 +17,6 @@ export interface ExtractionResult {
 export interface CreateReceiptInput {
   related_entity: ReceiptRelatedEntity
   target_income_source_id: string | null
+  target_credit_card_id: string | null
   file_path: string
 }
