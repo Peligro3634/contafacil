@@ -13,6 +13,7 @@ export type GroupExpenseSource = 'fondo_comun' | 'personal'
 export type ReceiptRelatedEntity = 'income_entry' | 'expense' | 'card_purchase'
 export type ReceiptStatus = 'pendiente_confirmacion' | 'confirmado' | 'editado_manualmente'
 export type ReceiptConfidence = 'alta' | 'media' | 'baja'
+export type PortfolioInstrumentType = 'accion' | 'cedear' | 'plazo_fijo' | 'fondo' | 'cripto' | 'otro'
 
 export interface Database {
   public: {
@@ -479,6 +480,45 @@ export interface Database {
           created_income_entry_id?: string | null
           created_expense_id?: string | null
           created_card_purchase_id?: string | null
+        }
+        Relationships: []
+      }
+      investment_portfolio: {
+        Row: {
+          id: string
+          user_id: string
+          instrument_type: PortfolioInstrumentType
+          name: string
+          quantity: number
+          purchase_price: number
+          purchase_date: string
+          current_value: number
+          note: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          instrument_type: PortfolioInstrumentType
+          name: string
+          quantity: number
+          purchase_price: number
+          purchase_date: string
+          current_value?: number
+          note?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          instrument_type?: PortfolioInstrumentType
+          name?: string
+          quantity?: number
+          purchase_price?: number
+          purchase_date?: string
+          current_value?: number
+          note?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

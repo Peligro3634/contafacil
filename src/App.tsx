@@ -9,6 +9,7 @@ import { PersonalExpensesPage } from '@/routes/PersonalExpensesPage'
 import { PersonalCardsPage } from '@/routes/PersonalCardsPage'
 import { PersonalInvestmentsPage } from '@/routes/PersonalInvestmentsPage'
 import { PersonalGoalsPage } from '@/routes/PersonalGoalsPage'
+import { PersonalSavingsPage } from '@/routes/PersonalSavingsPage'
 import { GroupsPage } from '@/routes/GroupsPage'
 import { GroupDetailPage } from '@/routes/GroupDetailPage'
 import { GroupGoalsPage } from '@/routes/GroupGoalsPage'
@@ -70,6 +71,14 @@ export function App() {
             element={
               <ProtectedRoute>
                 <PersonalGoalsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/personal/ahorros"
+            element={
+              <ProtectedRoute>
+                <PersonalSavingsPage />
               </ProtectedRoute>
             }
           />
