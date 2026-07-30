@@ -2,20 +2,10 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { MonthSelector } from '@/components/MonthSelector'
 import { PersonalTabs } from '@/components/PersonalTabs'
-import { cardExpenseBreakdown, closingPeriodForDueMonth } from '@/features/cards/aggregate'
-import { fetchCreditCards, fetchInstallmentsForPeriod } from '@/features/cards/api'
-import { businessExpenseBreakdown } from '@/features/investments/aggregate'
-import { fetchBusinessExpensesForMonth } from '@/features/investments/api'
-import { computeDashboardTotals, type DashboardTotals } from '@/features/personal/aggregate'
-import {
-  fetchFixedExpenseEntries,
-  fetchFixedExpenses,
-  fetchIncomeEntries,
-  fetchIncomeSources,
-  fetchVariableExpenses,
-} from '@/features/personal/api'
 import { Dashboard } from '@/features/personal/Dashboard'
-import { currentMonthKey, monthRange } from '@/lib/month'
+import type { DashboardTotals } from '@/features/personal/aggregate'
+import { currentMonthKey } from '@/lib/month'
+import { loadDashboardTotals } from '@/lib/dashboard'
 
 export function PersonalPage() {
   const [month, setMonth] = useState(currentMonthKey())
@@ -27,32 +17,10 @@ export function PersonalPage() {
     let active = true
     setLoading(true)
     setError(null)
-    const { start, end } = monthRange(month)
 
-    Promise.all([
-      fetchIncomeSources(),
-      fetchIncomeEntries(start, end),
-      fetchFixedExpenses(),
-      fetchFixedExpenseEntries(month),
-      fetchVariableExpenses(month),
-      fetchCreditCards(),
-      // Las cuotas que VENCEN en "month" son las que cerraron el mes anterior.
-      fetchInstallmentsForPeriod(closingPeriodForDueMonth(month)),
-      fetchBusinessExpensesForMonth(month),
-    ])
-      .then(([sources, entries, fixedExpenses, fixedEntries, variableExpenses, cards, installments, businessExpenses]) => {
-        if (!active) return
-        setTotals(
-          computeDashboardTotals(
-            sources,
-            entries,
-            fixedExpenses,
-            fixedEntries,
-            variableExpenses,
-            cardExpenseBreakdown(cards, installments),
-            businessExpenseBreakdown(sources, businessExpenses),
-          ),
-        )
+    loadDashboardTotals(month)
+      .then((totals) => {
+        if (active) setTotals(totals)
       })
       .catch((err) => {
         if (active) setError(err instanceof Error ? err.message : 'No se pudo cargar el dashboard')

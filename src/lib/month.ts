@@ -37,3 +37,22 @@ export function monthLabel(monthKey: string): string {
 export function monthRange(monthKey: string): { start: string; end: string } {
   return { start: monthKey, end: shiftMonth(monthKey, 1) }
 }
+
+// Diferencia en meses entre dos "mes" ('YYYY-MM-01'), positiva si "to" es
+// posterior a "from". Usado para calcular la cuota mensual sugerida de una
+// meta de ahorro (meses restantes hasta la fecha objetivo).
+export function monthsBetween(fromMonthKey: string, toMonthKey: string): number {
+  const [fromYear, fromMonth] = fromMonthKey.split('-').map(Number)
+  const [toYear, toMonth] = toMonthKey.split('-').map(Number)
+  return (toYear - fromYear) * 12 + (toMonth - fromMonth)
+}
+
+// Trunca una fecha completa ('YYYY-MM-DD') a su mes ('YYYY-MM-01').
+export function monthKeyFromDate(date: string): string {
+  return `${date.slice(0, 7)}-01`
+}
+
+export function todayDateKey(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}

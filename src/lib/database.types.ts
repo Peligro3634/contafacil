@@ -269,6 +269,50 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      savings_goals: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          target_amount: number
+          target_date: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          target_amount: number
+          target_date: string
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          target_amount?: number
+          target_date?: string
+        }
+        Relationships: []
+      }
+      goal_contributions: {
+        Row: {
+          id: string
+          savings_goal_id: string
+          date: string
+          amount: number
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          savings_goal_id: string
+          date: string
+          amount: number
+          note?: string | null
+          created_at?: string
+        }
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
