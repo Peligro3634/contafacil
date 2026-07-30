@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+/* Design tokens de marca — ver /brand/tokens.json (fuente: Claude Design) */
+@theme {
+  --color-brand-navy: #0D1B2A;
+  --color-brand-indigo: #1E3A8A;
+  --color-brand-blue: #2563EB;
+  --color-brand-emerald: #10B981;
+  --color-brand-lime: #84CC16;
+  --color-brand-bg: #F4F6F8;
+
+  --font-heading: 'Poppins', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+
+  --radius-brand-sm: 6px;
+  --radius-brand-md: 12px;
+  --radius-brand-lg: 20px;
+  --radius-brand-pill: 999px;
+}
+
 html,
 body,
 #root {
@@ -7,7 +25,7 @@ body,
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-brand-bg text-brand-navy font-body antialiased;
   /* respeta el notch/home-indicator cuando esto se empaquete con Capacitor */
   padding-top: env(safe-area-inset-top);
 }
