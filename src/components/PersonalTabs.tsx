@@ -5,6 +5,7 @@ const tabs = [
   { to: '/personal/ingresos', label: 'Ingresos', end: false },
   { to: '/personal/gastos', label: 'Gastos', end: false },
   { to: '/personal/tarjetas', label: 'Tarjetas', end: false },
+  { to: '/personal/inversiones', label: 'Inversiones', end: false },
 ]
 
 export function PersonalTabs() {

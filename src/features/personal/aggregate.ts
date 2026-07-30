@@ -11,6 +11,7 @@ export interface DashboardTotals {
   totalFixed: number
   totalVariable: number
   totalCards: number
+  totalBusiness: number
   totalExpenses: number
   available: number
   expenseBreakdown: BreakdownItem[]
@@ -27,6 +28,11 @@ export function computeDashboardTotals(
   // correspondiente): se suman a totalExpenses/available igual que cualquier
   // otro gasto, sin un calculo paralelo.
   cardExpenses: BreakdownItem[] = [],
+  // Costos de emprendimientos (ver businessExpenseBreakdown en
+  // features/investments): la venta ya suma 100% a totalIncome via
+  // income_entries, asi que sus costos tienen que restar aca para que el
+  // disponible refleje la ganancia neta y no el ingreso bruto del negocio.
+  businessExpenses: BreakdownItem[] = [],
 ): DashboardTotals {
   const sourceNameById = new Map(sources.map((source) => [source.id, source.name]))
   const incomeBySourceMap = new Map<string, number>()
@@ -57,10 +63,11 @@ export function computeDashboardTotals(
   const variableBreakdown = [...variableByCategoryMap.entries()].map(([label, amount]) => ({ label, amount }))
 
   const totalCards = cardExpenses.reduce((sum, item) => sum + item.amount, 0)
-  const expenseBreakdown = [...fixedBreakdown, ...variableBreakdown, ...cardExpenses].sort(
+  const totalBusiness = businessExpenses.reduce((sum, item) => sum + item.amount, 0)
+  const expenseBreakdown = [...fixedBreakdown, ...variableBreakdown, ...cardExpenses, ...businessExpenses].sort(
     (a, b) => b.amount - a.amount,
   )
-  const totalExpenses = totalFixed + totalVariable + totalCards
+  const totalExpenses = totalFixed + totalVariable + totalCards + totalBusiness
 
   return {
     totalIncome,
@@ -68,6 +75,7 @@ export function computeDashboardTotals(
     totalFixed,
     totalVariable,
     totalCards,
+    totalBusiness,
     totalExpenses,
     available: totalIncome - totalExpenses,
     expenseBreakdown,

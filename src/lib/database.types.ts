@@ -8,6 +8,7 @@ export type GroupRole = 'admin' | 'miembro'
 export type IncomeSourceOwnerType = 'user' | 'group'
 export type IncomeSourceType = 'empleado_fijo' | 'monotributo' | 'responsable_inscripto'
 export type ProductMode = 'simple' | 'detallado'
+export type BusinessExpenseType = 'costo_mercaderia' | 'gasto_operativo'
 
 export interface Database {
   public: {
@@ -223,6 +224,48 @@ export interface Database {
           amount: number
         }
         Insert: never
+        Update: never
+        Relationships: []
+      }
+      investments: {
+        Row: {
+          id: string
+          income_source_id: string
+          date: string
+          amount: number
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          income_source_id: string
+          date: string
+          amount: number
+          note?: string | null
+          created_at?: string
+        }
+        Update: never
+        Relationships: []
+      }
+      business_expenses: {
+        Row: {
+          id: string
+          income_source_id: string
+          type: BusinessExpenseType
+          category: string
+          month: string
+          amount: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          income_source_id: string
+          type: BusinessExpenseType
+          category: string
+          month: string
+          amount?: number
+          created_at?: string
+        }
         Update: never
         Relationships: []
       }

@@ -39,6 +39,20 @@ export async function fetchIncomeEntries(monthStart: string, monthEndExclusive: 
   return data
 }
 
+// Todas las ventas de una fuente de ingreso, sin filtro de mes: hace falta
+// para calcular el acumulado historico de un emprendimiento (recuperacion de
+// inversion), a diferencia de fetchIncomeEntries que esta acotado al mes del
+// dashboard.
+export async function fetchIncomeEntriesForSource(incomeSourceId: string): Promise<IncomeEntry[]> {
+  const { data, error } = await supabase
+    .from('income_entries')
+    .select('*')
+    .eq('income_source_id', incomeSourceId)
+    .order('date', { ascending: true })
+  if (error) throw error
+  return data
+}
+
 export async function createIncomeEntry(
   incomeSourceId: string,
   input: IncomeEntryInput,

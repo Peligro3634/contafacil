@@ -4,6 +4,8 @@ import { MonthSelector } from '@/components/MonthSelector'
 import { PersonalTabs } from '@/components/PersonalTabs'
 import { cardExpenseBreakdown, closingPeriodForDueMonth } from '@/features/cards/aggregate'
 import { fetchCreditCards, fetchInstallmentsForPeriod } from '@/features/cards/api'
+import { businessExpenseBreakdown } from '@/features/investments/aggregate'
+import { fetchBusinessExpensesForMonth } from '@/features/investments/api'
 import { computeDashboardTotals, type DashboardTotals } from '@/features/personal/aggregate'
 import {
   fetchFixedExpenseEntries,
@@ -36,8 +38,9 @@ export function PersonalPage() {
       fetchCreditCards(),
       // Las cuotas que VENCEN en "month" son las que cerraron el mes anterior.
       fetchInstallmentsForPeriod(closingPeriodForDueMonth(month)),
+      fetchBusinessExpensesForMonth(month),
     ])
-      .then(([sources, entries, fixedExpenses, fixedEntries, variableExpenses, cards, installments]) => {
+      .then(([sources, entries, fixedExpenses, fixedEntries, variableExpenses, cards, installments, businessExpenses]) => {
         if (!active) return
         setTotals(
           computeDashboardTotals(
@@ -47,6 +50,7 @@ export function PersonalPage() {
             fixedEntries,
             variableExpenses,
             cardExpenseBreakdown(cards, installments),
+            businessExpenseBreakdown(sources, businessExpenses),
           ),
         )
       })
