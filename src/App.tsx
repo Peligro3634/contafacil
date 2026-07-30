@@ -11,6 +11,9 @@ import { PersonalInvestmentsPage } from '@/routes/PersonalInvestmentsPage'
 import { PersonalGoalsPage } from '@/routes/PersonalGoalsPage'
 import { GroupsPage } from '@/routes/GroupsPage'
 import { GroupDetailPage } from '@/routes/GroupDetailPage'
+import { GroupGoalsPage } from '@/routes/GroupGoalsPage'
+import { GroupFundPage } from '@/routes/GroupFundPage'
+import { GroupExpensesPage } from '@/routes/GroupExpensesPage'
 import { ProfilePage } from '@/routes/ProfilePage'
 
 export function App() {
@@ -82,6 +85,30 @@ export function App() {
             element={
               <ProtectedRoute>
                 <GroupDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/groups/:groupId/metas"
+            element={
+              <ProtectedRoute>
+                <GroupGoalsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/groups/:groupId/fondo"
+            element={
+              <ProtectedRoute>
+                <GroupFundPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/groups/:groupId/gastos"
+            element={
+              <ProtectedRoute>
+                <GroupExpensesPage />
               </ProtectedRoute>
             }
           />

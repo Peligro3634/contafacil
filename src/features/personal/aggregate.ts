@@ -12,6 +12,7 @@ export interface DashboardTotals {
   totalVariable: number
   totalCards: number
   totalBusiness: number
+  totalGroupExpenses: number
   totalExpenses: number
   available: number
   expenseBreakdown: BreakdownItem[]
@@ -33,6 +34,12 @@ export function computeDashboardTotals(
   // income_entries, asi que sus costos tienen que restar aca para que el
   // disponible refleje la ganancia neta y no el ingreso bruto del negocio.
   businessExpenses: BreakdownItem[] = [],
+  // Gastos de grupo con source='personal' pagados por ESTE usuario (ver
+  // groupExpenseBreakdown en features/groups/aggregate.ts): salieron de su
+  // bolsillo real aunque el registro viva en la vista de grupo, asi que
+  // tienen que restar del disponible personal igual que cualquier otro
+  // gasto — si no, el dashboard subestimaria sus gastos reales.
+  groupPersonalExpenses: BreakdownItem[] = [],
 ): DashboardTotals {
   const sourceNameById = new Map(sources.map((source) => [source.id, source.name]))
   const incomeBySourceMap = new Map<string, number>()
@@ -64,10 +71,15 @@ export function computeDashboardTotals(
 
   const totalCards = cardExpenses.reduce((sum, item) => sum + item.amount, 0)
   const totalBusiness = businessExpenses.reduce((sum, item) => sum + item.amount, 0)
-  const expenseBreakdown = [...fixedBreakdown, ...variableBreakdown, ...cardExpenses, ...businessExpenses].sort(
-    (a, b) => b.amount - a.amount,
-  )
-  const totalExpenses = totalFixed + totalVariable + totalCards + totalBusiness
+  const totalGroupExpenses = groupPersonalExpenses.reduce((sum, item) => sum + item.amount, 0)
+  const expenseBreakdown = [
+    ...fixedBreakdown,
+    ...variableBreakdown,
+    ...cardExpenses,
+    ...businessExpenses,
+    ...groupPersonalExpenses,
+  ].sort((a, b) => b.amount - a.amount)
+  const totalExpenses = totalFixed + totalVariable + totalCards + totalBusiness + totalGroupExpenses
 
   return {
     totalIncome,
@@ -76,6 +88,7 @@ export function computeDashboardTotals(
     totalVariable,
     totalCards,
     totalBusiness,
+    totalGroupExpenses,
     totalExpenses,
     available: totalIncome - totalExpenses,
     expenseBreakdown,

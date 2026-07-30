@@ -9,6 +9,7 @@ export type IncomeSourceOwnerType = 'user' | 'group'
 export type IncomeSourceType = 'empleado_fijo' | 'monotributo' | 'responsable_inscripto'
 export type ProductMode = 'simple' | 'detallado'
 export type BusinessExpenseType = 'costo_mercaderia' | 'gasto_operativo'
+export type GroupExpenseSource = 'fondo_comun' | 'personal'
 
 export interface Database {
   public: {
@@ -313,6 +314,100 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      group_goals: {
+        Row: {
+          id: string
+          group_id: string
+          name: string
+          target_amount: number
+          target_date: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          group_id: string
+          name: string
+          target_amount: number
+          target_date: string
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          target_amount?: number
+          target_date?: string
+        }
+        Relationships: []
+      }
+      group_goal_contributions: {
+        Row: {
+          id: string
+          group_goal_id: string
+          user_id: string
+          date: string
+          amount: number
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          group_goal_id: string
+          user_id: string
+          date: string
+          amount: number
+          note?: string | null
+          created_at?: string
+        }
+        Update: never
+        Relationships: []
+      }
+      fund_contributions: {
+        Row: {
+          id: string
+          group_id: string
+          user_id: string
+          date: string
+          amount: number
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          group_id: string
+          user_id: string
+          date: string
+          amount: number
+          note?: string | null
+          created_at?: string
+        }
+        Update: never
+        Relationships: []
+      }
+      group_expenses: {
+        Row: {
+          id: string
+          group_id: string
+          paid_by_user_id: string
+          description: string
+          amount: number
+          month: string
+          source: GroupExpenseSource
+          created_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      group_expense_shares: {
+        Row: {
+          id: string
+          group_expense_id: string
+          user_id: string
+          amount: number
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -337,6 +432,17 @@ export interface Database {
       delete_card_purchase: {
         Args: { p_purchase_id: string }
         Returns: undefined
+      }
+      create_group_expense: {
+        Args: {
+          p_group_id: string
+          p_description: string
+          p_amount: number
+          p_month: string
+          p_source: GroupExpenseSource
+          p_shares: { user_id: string; amount: number }[] | null
+        }
+        Returns: Database['public']['Tables']['group_expenses']['Row']
       }
     }
     Enums: Record<string, never>

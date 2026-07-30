@@ -2,23 +2,26 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { MonthSelector } from '@/components/MonthSelector'
 import { PersonalTabs } from '@/components/PersonalTabs'
+import { useAuth } from '@/features/auth/AuthContext'
 import { Dashboard } from '@/features/personal/Dashboard'
 import type { DashboardTotals } from '@/features/personal/aggregate'
 import { currentMonthKey } from '@/lib/month'
 import { loadDashboardTotals } from '@/lib/dashboard'
 
 export function PersonalPage() {
+  const { user } = useAuth()
   const [month, setMonth] = useState(currentMonthKey())
   const [totals, setTotals] = useState<DashboardTotals | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!user) return
     let active = true
     setLoading(true)
     setError(null)
 
-    loadDashboardTotals(month)
+    loadDashboardTotals(month, user.id)
       .then((totals) => {
         if (active) setTotals(totals)
       })
@@ -32,7 +35,7 @@ export function PersonalPage() {
     return () => {
       active = false
     }
-  }, [month])
+  }, [month, user])
 
   return (
     <AppShell title="Personal">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { AppShell } from '@/components/AppShell'
+import { GroupTabs } from '@/components/GroupTabs'
 import { fetchGroup, fetchGroupMembers } from '@/features/groups/api'
 import { GroupDetail } from '@/features/groups/GroupDetail'
 import type { Group, GroupMember } from '@/features/groups/types'
@@ -31,6 +32,8 @@ export function GroupDetailPage() {
         <Link to="/groups" className="text-sm text-slate-500 underline">
           ‹ Volver a grupos
         </Link>
+
+        {groupId && <GroupTabs groupId={groupId} />}
 
         {loading && <p className="text-sm text-slate-500">Cargando…</p>}
         {error && <p className="text-sm text-red-600">{error}</p>}

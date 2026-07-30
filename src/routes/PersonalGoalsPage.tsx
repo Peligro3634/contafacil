@@ -36,11 +36,12 @@ export function PersonalGoalsPage() {
   const [showCreate, setShowCreate] = useState(false)
 
   useEffect(() => {
+    if (!user) return
     let active = true
     setLoading(true)
     setError(null)
 
-    Promise.all([fetchSavingsGoals(), loadDashboardTotals(currentMonthKey())])
+    Promise.all([fetchSavingsGoals(), loadDashboardTotals(currentMonthKey(), user.id)])
       .then(async ([goals, totals]) => {
         const loaded = await Promise.all(
           goals.map(async (goal) => ({ goal, contributions: await fetchGoalContributions(goal.id) })),
@@ -59,7 +60,7 @@ export function PersonalGoalsPage() {
     return () => {
       active = false
     }
-  }, [])
+  }, [user])
 
   if (!user) return null
 
