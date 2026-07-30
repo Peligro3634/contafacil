@@ -10,6 +10,7 @@ export interface DashboardTotals {
   incomeBySource: BreakdownItem[]
   totalFixed: number
   totalVariable: number
+  totalCards: number
   totalExpenses: number
   available: number
   expenseBreakdown: BreakdownItem[]
@@ -21,6 +22,11 @@ export function computeDashboardTotals(
   fixedExpenses: FixedExpense[],
   fixedEntries: FixedExpenseEntry[],
   variableExpenses: VariableExpense[],
+  // Gastos de tarjetas de credito que VENCEN en el mes del dashboard (ya
+  // resueltos por cardExpenseBreakdown a partir del mes de cierre
+  // correspondiente): se suman a totalExpenses/available igual que cualquier
+  // otro gasto, sin un calculo paralelo.
+  cardExpenses: BreakdownItem[] = [],
 ): DashboardTotals {
   const sourceNameById = new Map(sources.map((source) => [source.id, source.name]))
   const incomeBySourceMap = new Map<string, number>()
@@ -50,14 +56,18 @@ export function computeDashboardTotals(
   }
   const variableBreakdown = [...variableByCategoryMap.entries()].map(([label, amount]) => ({ label, amount }))
 
-  const expenseBreakdown = [...fixedBreakdown, ...variableBreakdown].sort((a, b) => b.amount - a.amount)
-  const totalExpenses = totalFixed + totalVariable
+  const totalCards = cardExpenses.reduce((sum, item) => sum + item.amount, 0)
+  const expenseBreakdown = [...fixedBreakdown, ...variableBreakdown, ...cardExpenses].sort(
+    (a, b) => b.amount - a.amount,
+  )
+  const totalExpenses = totalFixed + totalVariable + totalCards
 
   return {
     totalIncome,
     incomeBySource,
     totalFixed,
     totalVariable,
+    totalCards,
     totalExpenses,
     available: totalIncome - totalExpenses,
     expenseBreakdown,

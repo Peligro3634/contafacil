@@ -6,6 +6,7 @@ import { SignupPage } from '@/routes/SignupPage'
 import { PersonalPage } from '@/routes/PersonalPage'
 import { PersonalIncomePage } from '@/routes/PersonalIncomePage'
 import { PersonalExpensesPage } from '@/routes/PersonalExpensesPage'
+import { PersonalCardsPage } from '@/routes/PersonalCardsPage'
 import { GroupsPage } from '@/routes/GroupsPage'
 import { GroupDetailPage } from '@/routes/GroupDetailPage'
 import { ProfilePage } from '@/routes/ProfilePage'
@@ -39,6 +40,14 @@ export function App() {
             element={
               <ProtectedRoute>
                 <PersonalExpensesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/personal/tarjetas"
+            element={
+              <ProtectedRoute>
+                <PersonalCardsPage />
               </ProtectedRoute>
             }
           />

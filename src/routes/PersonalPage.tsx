@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { MonthSelector } from '@/components/MonthSelector'
 import { PersonalTabs } from '@/components/PersonalTabs'
+import { cardExpenseBreakdown, closingPeriodForDueMonth } from '@/features/cards/aggregate'
+import { fetchCreditCards, fetchInstallmentsForPeriod } from '@/features/cards/api'
 import { computeDashboardTotals, type DashboardTotals } from '@/features/personal/aggregate'
 import {
   fetchFixedExpenseEntries,
@@ -31,10 +33,22 @@ export function PersonalPage() {
       fetchFixedExpenses(),
       fetchFixedExpenseEntries(month),
       fetchVariableExpenses(month),
+      fetchCreditCards(),
+      // Las cuotas que VENCEN en "month" son las que cerraron el mes anterior.
+      fetchInstallmentsForPeriod(closingPeriodForDueMonth(month)),
     ])
-      .then(([sources, entries, fixedExpenses, fixedEntries, variableExpenses]) => {
+      .then(([sources, entries, fixedExpenses, fixedEntries, variableExpenses, cards, installments]) => {
         if (!active) return
-        setTotals(computeDashboardTotals(sources, entries, fixedExpenses, fixedEntries, variableExpenses))
+        setTotals(
+          computeDashboardTotals(
+            sources,
+            entries,
+            fixedExpenses,
+            fixedEntries,
+            variableExpenses,
+            cardExpenseBreakdown(cards, installments),
+          ),
+        )
       })
       .catch((err) => {
         if (active) setError(err instanceof Error ? err.message : 'No se pudo cargar el dashboard')

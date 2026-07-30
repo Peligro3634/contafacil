@@ -175,6 +175,57 @@ export interface Database {
         }
         Relationships: []
       }
+      credit_cards: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          closing_day: number
+          due_day: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          closing_day: number
+          due_day: number
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          closing_day?: number
+          due_day?: number
+        }
+        Relationships: []
+      }
+      card_purchases: {
+        Row: {
+          id: string
+          credit_card_id: string
+          date: string
+          amount_total: number
+          description: string
+          installments_count: number
+          created_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      card_purchase_installments: {
+        Row: {
+          id: string
+          card_purchase_id: string
+          credit_card_id: string
+          installment_number: number
+          month: string
+          amount: number
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -185,6 +236,20 @@ export interface Database {
       join_group_by_code: {
         Args: { p_invite_code: string }
         Returns: Database['public']['Tables']['groups']['Row']
+      }
+      create_card_purchase: {
+        Args: {
+          p_credit_card_id: string
+          p_date: string
+          p_amount_total: number
+          p_description: string
+          p_installments_count: number
+        }
+        Returns: Database['public']['Tables']['card_purchases']['Row']
+      }
+      delete_card_purchase: {
+        Args: { p_purchase_id: string }
+        Returns: undefined
       }
     }
     Enums: Record<string, never>
