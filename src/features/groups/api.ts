@@ -204,3 +204,17 @@ export async function fetchMyGroupPersonalExpensesForMonth(userId: string, month
   if (error) throw error
   return data
 }
+
+// Gastos de grupo pagados de bolsillo propio por este usuario desde
+// "fromMonth" (sin limite superior): hace falta para el fondo general (ver
+// src/lib/cashBalance.ts).
+export async function fetchMyGroupPersonalExpensesFrom(userId: string, fromMonth: string): Promise<GroupExpense[]> {
+  const { data, error } = await supabase
+    .from('group_expenses')
+    .select('*')
+    .eq('paid_by_user_id', userId)
+    .eq('source', 'personal')
+    .gte('month', fromMonth)
+  if (error) throw error
+  return data
+}

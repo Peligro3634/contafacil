@@ -91,20 +91,27 @@ export function GoalCard({
         <p className="text-xs uppercase tracking-wide text-slate-500">Aportes</p>
         {contributions.length > 0 && (
           <ul className="mt-1 flex flex-col divide-y divide-slate-100">
-            {contributions.map((contribution) => (
-              <li key={contribution.id} className="flex items-center justify-between gap-2 py-2 text-sm">
-                <div>
-                  <p>{contribution.date}</p>
-                  {contribution.note && <p className="text-slate-500">{contribution.note}</p>}
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <span className="font-medium">{formatCurrency(contribution.amount)}</span>
-                  <button onClick={() => onDeleteContribution(contribution.id)} className="text-red-600 underline">
-                    Eliminar
-                  </button>
-                </div>
-              </li>
-            ))}
+            {contributions.map((contribution) => {
+              const isWithdrawal = contribution.amount < 0
+              return (
+                <li key={contribution.id} className="flex items-center justify-between gap-2 py-2 text-sm">
+                  <div>
+                    <p>
+                      {contribution.date} · {isWithdrawal ? 'Retiro' : 'Aporte'}
+                    </p>
+                    {contribution.note && <p className="text-slate-500">{contribution.note}</p>}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className={`font-medium ${isWithdrawal ? 'text-red-600' : 'text-brand-emerald'}`}>
+                      {formatCurrency(contribution.amount)}
+                    </span>
+                    <button onClick={() => onDeleteContribution(contribution.id)} className="text-red-600 underline">
+                      Eliminar
+                    </button>
+                  </div>
+                </li>
+              )
+            })}
           </ul>
         )}
 

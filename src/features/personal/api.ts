@@ -113,6 +113,15 @@ export async function fetchFixedExpenseEntries(month: string): Promise<FixedExpe
   return data
 }
 
+// Todas las entradas de gastos fijos desde "fromMonth" (sin limite superior):
+// hace falta para el fondo general (ver src/lib/cashBalance.ts), que suma el
+// disponible de cada mes desde el saldo inicial hasta hoy de una sola vez.
+export async function fetchFixedExpenseEntriesFrom(fromMonth: string): Promise<FixedExpenseEntry[]> {
+  const { data, error } = await supabase.from('fixed_expense_entries').select('*').gte('month', fromMonth)
+  if (error) throw error
+  return data
+}
+
 export async function upsertFixedExpenseEntry(
   fixedExpenseId: string,
   month: string,
@@ -133,6 +142,14 @@ export async function fetchVariableExpenses(month: string): Promise<VariableExpe
     .select('*')
     .eq('month', month)
     .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+// Todos los gastos variables desde "fromMonth" (sin limite superior): hace
+// falta para el fondo general (ver src/lib/cashBalance.ts).
+export async function fetchVariableExpensesFrom(fromMonth: string): Promise<VariableExpense[]> {
+  const { data, error } = await supabase.from('variable_expenses').select('*').gte('month', fromMonth)
   if (error) throw error
   return data
 }

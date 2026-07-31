@@ -14,6 +14,7 @@ export type ReceiptRelatedEntity = 'income_entry' | 'expense' | 'card_purchase'
 export type ReceiptStatus = 'pendiente_confirmacion' | 'confirmado' | 'editado_manualmente'
 export type ReceiptConfidence = 'alta' | 'media' | 'baja'
 export type PortfolioInstrumentType = 'accion' | 'cedear' | 'plazo_fijo' | 'fondo' | 'cripto' | 'otro'
+export type DebtPaymentSource = 'efectivo' | 'cuenta_bancaria' | 'ahorros' | 'otro'
 
 export interface Database {
   public: {
@@ -165,6 +166,7 @@ export interface Database {
           category: string
           month: string
           amount: number
+          debt_payment_id: string | null
           created_at: string
         }
         Insert: {
@@ -173,6 +175,7 @@ export interface Database {
           category: string
           month: string
           amount?: number
+          debt_payment_id?: string | null
           created_at?: string
         }
         Update: {
@@ -522,6 +525,70 @@ export interface Database {
         }
         Relationships: []
       }
+      debts: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          original_amount: number
+          installments_count: number | null
+          start_date: string
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          original_amount: number
+          installments_count?: number | null
+          start_date: string
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          original_amount?: number
+          installments_count?: number | null
+          start_date?: string
+          note?: string | null
+        }
+        Relationships: []
+      }
+      debt_payments: {
+        Row: {
+          id: string
+          debt_id: string
+          date: string
+          amount: number
+          source: DebtPaymentSource
+          note: string | null
+          created_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      cash_balance_baseline: {
+        Row: {
+          user_id: string
+          initial_amount: number
+          initial_date: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          initial_amount?: number
+          initial_date: string
+          updated_at?: string
+        }
+        Update: {
+          initial_amount?: number
+          initial_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -540,11 +607,26 @@ export interface Database {
           p_amount_total: number
           p_description: string
           p_installments_count: number
+          p_paid_installments_count?: number
         }
         Returns: Database['public']['Tables']['card_purchases']['Row']
       }
       delete_card_purchase: {
         Args: { p_purchase_id: string }
+        Returns: undefined
+      }
+      create_debt_payment: {
+        Args: {
+          p_debt_id: string
+          p_date: string
+          p_amount: number
+          p_source: DebtPaymentSource
+          p_note: string | null
+        }
+        Returns: Database['public']['Tables']['debt_payments']['Row']
+      }
+      delete_debt_payment: {
+        Args: { p_payment_id: string }
         Returns: undefined
       }
       create_group_expense: {

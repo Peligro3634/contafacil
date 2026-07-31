@@ -42,6 +42,7 @@ export async function createCardPurchase(creditCardId: string, input: CardPurcha
     p_amount_total: input.amount_total,
     p_description: input.description,
     p_installments_count: input.installments_count,
+    p_paid_installments_count: input.paid_installments_count ?? 0,
   })
   if (error) throw error
   return data
@@ -56,6 +57,34 @@ export async function deleteCardPurchase(purchaseId: string): Promise<void> {
 // filtra a tarjetas del usuario autenticado.
 export async function fetchInstallmentsForPeriod(period: string): Promise<CardPurchaseInstallment[]> {
   const { data, error } = await supabase.from('card_purchase_installments').select('*').eq('month', period)
+  if (error) throw error
+  return data
+}
+
+// Todas las cuotas de TODAS las tarjetas cuyo mes de cierre todavia no paso
+// (>= fromPeriod), sin importar el mes seleccionado en el dashboard: hace
+// falta para el balance total de Resumen (ver src/lib/balanceOverview.ts),
+// que necesita el total de compromisos futuros de tarjeta de una sola vez.
+export async function fetchPendingInstallmentsFrom(fromPeriod: string): Promise<CardPurchaseInstallment[]> {
+  const { data, error } = await supabase.from('card_purchase_installments').select('*').gte('month', fromPeriod)
+  if (error) throw error
+  return data
+}
+
+// Cuotas de TODAS las tarjetas cuyo mes de cierre ya vencio, entre fromPeriod
+// y toPeriod (ambos inclusive): hace falta para el fondo general (ver
+// src/lib/cashBalance.ts), que solo debe contar cuotas que ya impactaron el
+// disponible de algun mes pasado -- las futuras siguen en
+// fetchPendingInstallmentsFrom, no se cuentan dos veces.
+export async function fetchInstallmentsBetween(
+  fromPeriod: string,
+  toPeriod: string,
+): Promise<CardPurchaseInstallment[]> {
+  const { data, error } = await supabase
+    .from('card_purchase_installments')
+    .select('*')
+    .gte('month', fromPeriod)
+    .lte('month', toPeriod)
   if (error) throw error
   return data
 }

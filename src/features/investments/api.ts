@@ -69,6 +69,28 @@ export async function fetchBusinessExpensesForMonth(month: string): Promise<Busi
   return data
 }
 
+// Costos de TODOS los emprendimientos PERSONALES del usuario desde
+// "fromMonth" (sin limite superior): hace falta para el fondo general (ver
+// src/lib/cashBalance.ts). Mismo filtro owner_type='user' que
+// fetchBusinessExpensesForMonth, ver comentario ahi.
+export async function fetchBusinessExpensesFrom(fromMonth: string): Promise<BusinessExpense[]> {
+  const { data: sources, error: sourcesError } = await supabase
+    .from('income_sources')
+    .select('id')
+    .eq('owner_type', 'user')
+  if (sourcesError) throw sourcesError
+  const sourceIds = sources.map((source) => source.id)
+  if (sourceIds.length === 0) return []
+
+  const { data, error } = await supabase
+    .from('business_expenses')
+    .select('*')
+    .in('income_source_id', sourceIds)
+    .gte('month', fromMonth)
+  if (error) throw error
+  return data
+}
+
 export async function createBusinessExpense(
   incomeSourceId: string,
   month: string,

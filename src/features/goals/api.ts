@@ -55,3 +55,20 @@ export async function deleteGoalContribution(id: string): Promise<void> {
   const { error } = await supabase.from('goal_contributions').delete().eq('id', id)
   if (error) throw error
 }
+
+// Retiro de una meta (gasto con origen "Ahorro", ver NewExpenseForm): es un
+// aporte mas con monto NEGATIVO, no una tabla nueva — computeGoalStatus ya
+// suma amount tal cual, asi que un retiro resta del ahorrado sin cambios en
+// el calculo.
+export async function createGoalWithdrawal(
+  savingsGoalId: string,
+  input: GoalContributionInput,
+): Promise<GoalContribution> {
+  const { data, error } = await supabase
+    .from('goal_contributions')
+    .insert({ savings_goal_id: savingsGoalId, date: input.date, amount: -Math.abs(input.amount), note: input.note })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}

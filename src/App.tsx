@@ -7,6 +7,7 @@ import { PersonalPage } from '@/routes/PersonalPage'
 import { PersonalIncomePage } from '@/routes/PersonalIncomePage'
 import { PersonalExpensesPage } from '@/routes/PersonalExpensesPage'
 import { PersonalCardsPage } from '@/routes/PersonalCardsPage'
+import { PersonalDebtsPage } from '@/routes/PersonalDebtsPage'
 import { PersonalInvestmentsPage } from '@/routes/PersonalInvestmentsPage'
 import { PersonalGoalsPage } from '@/routes/PersonalGoalsPage'
 import { PersonalSavingsPage } from '@/routes/PersonalSavingsPage'
@@ -55,6 +56,14 @@ export function App() {
             element={
               <ProtectedRoute>
                 <PersonalCardsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/personal/deudas"
+            element={
+              <ProtectedRoute>
+                <PersonalDebtsPage />
               </ProtectedRoute>
             }
           />

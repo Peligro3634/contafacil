@@ -15,4 +15,8 @@ export interface CardPurchaseInput {
   amount_total: number
   description: string
   installments_count: number
+  // Cuotas ya abonadas ANTES de cargar la compra (alta de una deuda de
+  // tarjeta preexistente, para que un usuario nuevo no arranque en cero).
+  // 0 = compra nueva, ninguna cuota pagada todavia.
+  paid_installments_count?: number
 }

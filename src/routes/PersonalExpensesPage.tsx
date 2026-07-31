@@ -3,6 +3,10 @@ import { AppShell } from '@/components/AppShell'
 import { MonthSelector } from '@/components/MonthSelector'
 import { PersonalTabs } from '@/components/PersonalTabs'
 import { useAuth } from '@/features/auth/AuthContext'
+import { createCardPurchase, fetchCreditCards } from '@/features/cards/api'
+import type { CreditCard } from '@/features/cards/types'
+import { createGoalWithdrawal, fetchSavingsGoals } from '@/features/goals/api'
+import type { SavingsGoal } from '@/features/goals/types'
 import {
   createFixedExpense,
   createVariableExpense,
@@ -13,8 +17,8 @@ import {
   upsertFixedExpenseEntry,
 } from '@/features/personal/api'
 import { CreateFixedExpenseForm } from '@/features/personal/CreateFixedExpenseForm'
-import { CreateVariableExpenseForm } from '@/features/personal/CreateVariableExpenseForm'
 import { FixedExpenseRow } from '@/features/personal/FixedExpenseRow'
+import { NewExpenseForm } from '@/features/personal/NewExpenseForm'
 import type { FixedExpense, FixedExpenseEntry, VariableExpense } from '@/features/personal/types'
 import { VariableExpenseList } from '@/features/personal/VariableExpenseList'
 import { ReceiptCaptureFlow } from '@/features/receipts/ReceiptCaptureFlow'
@@ -26,6 +30,8 @@ export function PersonalExpensesPage() {
   const [fixedExpenses, setFixedExpenses] = useState<FixedExpense[]>([])
   const [fixedEntries, setFixedEntries] = useState<FixedExpenseEntry[]>([])
   const [variableExpenses, setVariableExpenses] = useState<VariableExpense[]>([])
+  const [goals, setGoals] = useState<SavingsGoal[]>([])
+  const [cards, setCards] = useState<CreditCard[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showCreateFixed, setShowCreateFixed] = useState(false)
@@ -36,12 +42,20 @@ export function PersonalExpensesPage() {
     setLoading(true)
     setError(null)
 
-    Promise.all([fetchFixedExpenses(), fetchFixedExpenseEntries(month), fetchVariableExpenses(month)])
-      .then(([fe, fee, ve]) => {
+    Promise.all([
+      fetchFixedExpenses(),
+      fetchFixedExpenseEntries(month),
+      fetchVariableExpenses(month),
+      fetchSavingsGoals(),
+      fetchCreditCards(),
+    ])
+      .then(([fe, fee, ve, g, c]) => {
         if (!active) return
         setFixedExpenses(fe)
         setFixedEntries(fee)
         setVariableExpenses(ve)
+        setGoals(g)
+        setCards(c)
       })
       .catch((err) => {
         if (active) setError(err instanceof Error ? err.message : 'No se pudieron cargar los gastos')
@@ -112,10 +126,24 @@ export function PersonalExpensesPage() {
               )}
             </div>
 
-            <CreateVariableExpenseForm
+            <NewExpenseForm
+              goals={goals}
+              cards={cards}
               onSubmit={async (input) => {
-                const created = await createVariableExpense(user.id, { ...input, month })
-                setVariableExpenses((prev) => [created, ...prev])
+                if (input.source === 'disponible') {
+                  const created = await createVariableExpense(user.id, { category: input.category, month, amount: input.amount })
+                  setVariableExpenses((prev) => [created, ...prev])
+                } else if (input.source === 'ahorro') {
+                  await createGoalWithdrawal(input.goalId, { date: input.date, amount: input.amount, note: input.note })
+                } else {
+                  await createCardPurchase(input.cardId, {
+                    date: input.date,
+                    description: input.description,
+                    amount_total: input.amount_total,
+                    installments_count: input.installments_count,
+                    paid_installments_count: 0,
+                  })
+                }
               }}
             />
 

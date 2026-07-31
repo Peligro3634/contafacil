@@ -37,7 +37,7 @@ export function computeGoalStatus(
     pendiente,
     mesesRestantes,
     cuotaMensualSugerida: cumplida ? 0 : pendiente / mesesRestantes,
-    progresoPct: goal.target_amount > 0 ? Math.min(100, (ahorrado / goal.target_amount) * 100) : 0,
+    progresoPct: goal.target_amount > 0 ? Math.max(0, Math.min(100, (ahorrado / goal.target_amount) * 100)) : 0,
     cumplida,
     vencida,
   }
