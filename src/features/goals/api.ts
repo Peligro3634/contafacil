@@ -38,6 +38,15 @@ export async function fetchGoalContributions(savingsGoalId: string): Promise<Goa
   return data
 }
 
+// Todos los aportes del usuario (RLS los acota a metas propias vía
+// savings_goals). Sirve para el total ahorrado del resumen de patrimonio,
+// sin tener que pedir aporte por aporte meta a meta.
+export async function fetchAllGoalContributions(): Promise<GoalContribution[]> {
+  const { data, error } = await supabase.from('goal_contributions').select('*')
+  if (error) throw error
+  return data
+}
+
 export async function createGoalContribution(
   savingsGoalId: string,
   input: GoalContributionInput,

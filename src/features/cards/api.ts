@@ -59,3 +59,12 @@ export async function fetchInstallmentsForPeriod(period: string): Promise<CardPu
   if (error) throw error
   return data
 }
+
+// Cuotas cuyo mes de cierre es >= fromPeriod: deuda de tarjeta todavía
+// pendiente (el resumen que vence este mes y todos los siguientes). Las de
+// meses de cierre anteriores ya vencieron/se pagaron, así que quedan fuera.
+export async function fetchOutstandingInstallments(fromPeriod: string): Promise<CardPurchaseInstallment[]> {
+  const { data, error } = await supabase.from('card_purchase_installments').select('*').gte('month', fromPeriod)
+  if (error) throw error
+  return data
+}
